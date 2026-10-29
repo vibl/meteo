@@ -1,12 +1,10 @@
 <script lang="ts">
-	import './layout.css';
-	import favicon from '$lib/assets/favicon.svg';
+  import '../app.css';
 
-	let { children } = $props();
+  let { children } = $props();
 </script>
 
-<svelte:head>
-	<link rel="icon" href={favicon} />
-</svelte:head>
-
-{@render children()}
+<!-- Full-viewport flex column: the page below relies on `h-full` for its grids. -->
+<div class="flex h-screen min-w-0 flex-col overflow-hidden">
+  {@render children()}
+</div>
