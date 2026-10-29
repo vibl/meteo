@@ -37,7 +37,11 @@ The wyts dark palette is in `src/app.css` as fixed tokens, with the `--wx-*` map
 
 A push to `main` auto-deploys: Dokploy builds this repo's `Dockerfile` and serves it at `meteo.wyzar.io` through Traefik and a Cloudflare Tunnel. The container build itself is described in [README.md](README.md).
 
-The one-time setup (Dokploy application, domain, tunnel ingress) goes through wyts-platform's `scripts/deployment/dokploy-api.ts` and `cloudflare-tunnel-setup.ts`; this repo deliberately carries no deployment scripts and has no secrets for them to manage.
+The one-time setup (Dokploy application, domain, tunnel ingress) goes through wyts-platform's `scripts/deployment/dokploy-api.ts` and `cloudflare-tunnel-setup.ts`; this repo deliberately carries no deployment scripts and has no secrets for them to manage. The tunnel needs nothing per app: a wildcard rule routes every `*.wyzar.io` host to Traefik (wyts-platform's `docs/development/deployment/networking-ingress.md`).
+
+Dokploy application `meteo` is `6DxKJnAeV08TefWwctYRH` (swarm name `meteo-orjeii`), domain `wG2rfm2GnKo2UkPkLi207`. A build takes about a minute.
+
+**Push auto-deploy does not work yet** (2026-10-29): Dokploy's GitHub App receives no push events, see "GitHub App" in wyts-platform's `docs/development/deployment/dokploy-platform.md`. Until it is fixed, redeploy by hand: from wyts-platform, `tsx --env-file=.env.development.local scripts/deployment/dokploy-api.ts post application.deploy '{"applicationId":"6DxKJnAeV08TefWwctYRH"}'`.
 
 ## Checks before a push
 

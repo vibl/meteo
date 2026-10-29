@@ -1,6 +1,6 @@
 # Meteo bench extraction
 
-**Status:** active — the new app is built, pushed and passing its local checks; it has not been run by a human, not deployed, and not yet removed from wyts-platform.
+**Status:** active — the app is deployed at `https://meteo.wyzar.io` and passes the parity check there; push auto-deploy does not work yet, and the bench has not been removed from wyts-platform.
 
 ## Goal
 
@@ -12,58 +12,54 @@ Done when `pnpm dev` runs the app in `~/dev/_/meteo/` with nothing importing fro
 
 The decisions, each with its reasoning, are in [2026-10-26_meteo-bench-extraction-decisions.md](../../plans/2026-10-26_meteo-bench-extraction-decisions.md). They are settled; do not reopen them unless new facts weaken their reasoning.
 
-The step-by-step plan is [2026-10-26_meteo-bench-extraction-plan.md](../../plans/2026-10-26_meteo-bench-extraction-plan.md), now superseded by this handoff (its steps 1 to 5 are done). Steps 6 (deploy) and 7 (removal from wyts-platform) are still to do and are still worth reading in full there: this handoff does not repeat their detail.
+The step-by-step plan is [2026-10-26_meteo-bench-extraction-plan.md](../../plans/2026-10-26_meteo-bench-extraction-plan.md), now superseded by this handoff (steps 1 to 6 are done, apart from push auto-deploy). Step 7 (removal from wyts-platform) is still to do and is still worth reading in full there: this handoff does not repeat its detail. Both files sit under `.agents/plans/`, so the user's rule applies: ask before reading them.
 
-Three corrections to that plan, found while carrying it out:
+Corrections to that plan, found while carrying it out:
 
 - **wyts-platform has no `CLAUDE.md` any more.** Commit `24217ea6` made `AGENTS.md` the instructions file and dropped it. Step 7's "remove the `meteo` row from the Scopes table in `CLAUDE.md`" means `AGENTS.md`, whose Scopes table is around line 113. The plan's requirement to **ask the user before editing it** still stands.
 - **The shadcn-svelte CLI no longer does what step 3 assumes** (SHADCN-DRIFT). See [the lesson doc](../../../../wyts-platform/.agents/docs/shadcn-svelte/cli-registry-drift.md), which stays in wyts-platform because it describes that repo's components. The user chose to copy the three components from wyts-platform instead.
-- **The port base is `b416a2cd`**, not the hash the plan was written against: this session first committed the previous session's own uncommitted docs (see the session log).
+- **The port base is `b416a2cd`**, not the hash the plan was written against.
+- **WILDCARD-INGRESS worked as planned**, including the proxied wildcard CNAME the decisions file listed as undocumented: no fallback needed. One deviation from the plan's check list: a random `*.wyzar.io` host answers **502, not 404** (Traefik has no certificate for it, cloudflared refuses the default one). Nothing leaks; the user has not said whether a clean 404 is wanted.
 
 ## State
 
-**Where this handoff lives.** In `~/dev/_/meteo/.agents/` since 2026-10-29, with the plan and the decisions log in `.agents/plans/`. They were written in wyts-platform, so paths in them without a `~/dev/_/meteo/` prefix are relative to `~/dev/_/wyts-platform/`; steps 6 and 7 run there. wyts-platform's `AGENTS.md` points here. The older session log's links to `.specs/` and `.agents/docs/` are wyts-platform paths.
+**Where this handoff lives.** In `~/dev/_/meteo/.agents/`, with the plan and the decisions log in `.agents/plans/`. They were written in wyts-platform, so paths in them without a `~/dev/_/meteo/` prefix are relative to `~/dev/_/wyts-platform/`; step 7 runs there. wyts-platform's `AGENTS.md` points here.
 
-**The new app exists and works as far as automated checks can tell.** `~/dev/_/meteo/`, three commits, HEAD `297d0ac`, branch `main`, pushed to `git@github.com:vibl/meteo.git` (public, default branch `main`).
+**The app.** `~/dev/_/meteo/`, branch `main`, pushed to `git@github.com:vibl/meteo.git` (public). What was built and why is in the [scaffold-and-port log](sessions/2026-10-29_scaffold-and-port.md) and in the repo's own `AGENTS.md` and `README.md`. `pnpm check`, `pnpm lint` and `pnpm build` pass. The local backup branch `backup/pre-readme-scrub` is safe to delete. `src/lib/assets/favicon.svg` (from the scaffold) is unused and was left in place.
 
-The history was rewritten once, on the day it was created, to keep the deployment detail out of it (see Open questions): the port commit is now `297d0ac` and carries the tree that `c47f1a1` had. The pre-rewrite tip is kept locally as the branch `backup/pre-readme-scrub`, which is safe to delete.
+**Deployed, and parity confirmed by the user** on `pnpm dev` and on `https://meteo.wyzar.io` (2026-10-29: "perfect"). Phone-side checks (PWA install, notification on Chrome for Android) were part of the plan's list; the user's confirmation did not say whether a phone was used.
 
-What is in it, and what was decided while building it:
+- Dokploy application `meteo`: `6DxKJnAeV08TefWwctYRH`, swarm name `meteo-orjeii`, GitHub provider `jXWLziIJwxc9cu_G2xQSA` on `vibl/meteo` `main`, build type Dockerfile, `autoDeploy: true`. Domain `wG2rfm2GnKo2UkPkLi207`: `meteo.wyzar.io`, port 3000, `https: true`, `certificateType: letsencrypt`. First build (manual `application.deploy`) succeeded in about a minute. These IDs are also in meteo's `AGENTS.md`.
+- Tunnel: wildcard ingress rule and proxied `*` CNAME live since 2026-10-29 (tunnel config version 3). Verified through Cloudflare (`curl --resolve` to a Cloudflare IP): `meteo` 200, `wyts`/`zero`/`electric` 200, `dokploy.wyzar.io/` 404, webhook path 401, random host 502.
+- wyts-platform commit `226087af` (`chore: route *.wyzar.io through the tunnel`, only `scripts/deployment/cloudflare-tunnel-setup.ts`) is **not pushed**, and neither is the docs commit made at the end of this session. wyts-platform's working tree holds the user's own unrelated uncommitted changes (`.env`, `.gitignore`, several plan files, `scripts/claude-keepalive/README.md`, `scripts/inspect/zero-replica-exists-cost.ts`): never stage them.
 
-- **Scaffold:** `sv create` minimal + TypeScript + Prettier + Tailwind 4 + `@sveltejs/adapter-node`. Kit 2.49.4, Svelte 5.46.3, Vite 7.3.2. The Tailwind entry was moved from the scaffold's `src/routes/layout.css` to `src/app.css`, and Prettier was set to wyts-platform's style (2 spaces) so the ported files stay byte-identical to their originals.
-- **UI kit:** `Button`, `Checkbox`, `Label` and `cn` were **copied from wyts-platform**, not generated by the CLI (user decision, after SHADCN-DRIFT). They carry wyts's customizations, and the page depends on the `outline` variant and the `icon-sm` size. `components.json` exists but describes what the CLI would generate today (vega preset, neutral base, Lucide) — it is metadata, not provenance. All of this is written up in the new repo's `AGENTS.md`.
-- **Palette:** `src/app.css` holds the wyts dark tokens from `src/styles/strategies/combination-a.css` plus the `--wx-*` mapping trimmed from `src/lib/theme/wyts-tokens.css`, and `color-scheme: dark` at `:root`. The grid variables and the behavior rules live in `src/lib/components/DatagridTheme.svelte`, trimmed from `src/lib/components/ui/datagrid/theme.svelte` (gantt, tooltip, sidebar and menu rules dropped — the two grids use none of them). The SVAR icon font import was kept: the sortable headers draw their arrows from it.
-- **Port:** Meteo's own code copied as is, imports repointed to `$lib`. Endpoints are `/api/forecast`, `/api/rain-nowcast`, `/api/sunrise-sunset`; there is no `notify-rain-stopped`, no `handle`, no `apiCall`, no `valibot`, no `node-notifier`. `RefreshFrequencySlider.svelte` was left behind as dead code, as planned.
-- **Notification** (NOTIFICATIONS): `src/lib/notify.ts` requests permission when the birds checkbox is turned on, guarded by a `hydrated` flag so reading the checkbox back from `localStorage` never triggers the prompt. It shows the notification through `ServiceWorkerRegistration.showNotification()` when a registration exists and falls back to `new Notification()`. `src/service-worker.ts` was added for the Chrome-for-Android case: no fetch handler, no cache, plus a `notificationclick` handler that focuses the app. SvelteKit registers it in production builds only, so the desktop dev path always takes the constructor fallback.
-- **PWA:** `static/manifest.webmanifest` with `start_url`/`scope` `/` and icon `/icon.svg`; `src/app.html` carries a static manifest link, `theme-color` `#0EA5E9` and the favicon. wyts-platform's `PWA_BENCHES` script is gone. Note that the bench installs **without** a service worker today (`docs/wyts-framework/pwa.md` says so explicitly), so the new SW is not what makes it installable.
-- **Deployment files:** multi-stage `Dockerfile` (Node 22 alpine, deps / deps-prod / builder / production, `node build` on `PORT=3000`) and a `.dockerignore`. pnpm is pinned to `10.28.1` in both `packageManager` and `corepack prepare`, per `docs/development/runbooks/dokploy-pnpm-lockfile-config-mismatch.md`.
-- **Docs:** `README.md` built from `docs/wyts-framework/benches/meteo.md` and updated for the new paths and the browser notification; `AGENTS.md` records what the app is not, the origin, SHADCN-DRIFT, the styling layout and the deployment. The split is deliberate (user decision): because the repo is public, nothing that names the deployment — `meteo.wyzar.io`, Dokploy, Traefik, the Cloudflare Tunnel — is in the `README.md` any more. It lives in `AGENTS.md`, which is in the same public repo, so this is a visibility change, not a privacy guarantee.
+**Push auto-deploy is broken, for every Dokploy app, not just meteo.** The GitHub App Dokploy uses, `Dokploy-2026-05-07-vibl`, has the right webhook URL (`https://dokploy.wyzar.io/api/deploy/github`, reported by the user) but GitHub sends it no `push` events: its delivery log showed only one delivery (`installation_repositories.added`, which Dokploy always answers 400, so "failed" is normal for it). The wyts Server app's last push-triggered deployment is 2026-08-11 (read from `deployment.all`). Cause not found; the user was asked to check the app's "Permissions & events" → Push subscription and any pending permission request on the installation. Details in wyts-platform's `docs/development/deployment/dokploy-platform.md`, section "GitHub App".
 
-**Verified by running it:** `pnpm check` (svelte-check, 0 errors 0 warnings), `pnpm lint`, `pnpm build` (adapter-node output, service worker emitted to the client build), `pnpm install --frozen-lockfile`. The plan's `rg -n "wyts|\$lib/server/http|apiCall|node-notifier"` check finds only provenance comments, no imports.
+**GitHub Apps.** The user deleted the two stale apps, `Dokploy-2025-12-08-6dpi7v` and `Vibl-Dokploy-Home-Server`, and added `vibl/meteo` to `Dokploy-2026-05-07-vibl`; Dokploy now lists both repos.
 
-**Not verified:** the `Dockerfile` has never been built — the Docker CLI is present in the agent sandbox but the daemon socket is not, so the first Dokploy deploy is its first build. The app has never been opened in a browser, so nothing in the parity checklist is confirmed.
+**Two credential exposures in this session's transcript** (see Open questions): the deleted `6dpi7v` app's client secret and part of its private key (harmless once the app is deleted), and the `home-server` tunnel's connector token in full (still valid).
 
-**Manifest:** `~/dev/projects.toml` has a `[meteo]` entry with `domain = ["tools"]` (user choice), `kind = "project"`, `origin = "own"`, `status = "active"`, `context = "perso"`. `dev-views check` reports 93 entries ok and `dev-views build` created the `by/` links. `~/dev` is not a git repository, so there is nothing to commit there.
-
-**One loose end in the new repo:** `src/lib/assets/favicon.svg` came with the scaffold and is now unused (the favicon is served from `static/icon.svg`). It was left in place rather than deleted.
+**The dev server** started this session (`pnpm dev` on port 5173) may still be running in the background; it is disposable.
 
 ## Next
 
-1. **Parity check on `pnpm dev`** — this is the resume point and it needs the user. Run `pnpm dev` in `~/dev/_/meteo/` and walk the parity checklist in the plan: both grids, the null-row filtering, day/night shading and the current-hour highlight, the responsive layout below `md`, the three refresh triggers, the birds alert (checkbox persistence, the rain→dry transition, sound **and** browser notification), the PWA install, and the look.
-2. **Step 6, deploy.** Read wyts-platform's `docs/development/deployment/dokploy-platform.md`, `networking-ingress.md` and `~/dev/_/sys/.agents/docs/home-server/dokploy/` first. Create the Dokploy application on `vibl/meteo` branch `main`, build type Dockerfile, `autoDeploy: true`, domain `meteo.wyzar.io` on port 3000 over `websecure` with the `letsencrypt` resolver. Use the REST helper (`tsx --env-file=.env.development.local scripts/deployment/dokploy-api.ts …`) for writes: the Dokploy MCP write schemas have drifted. Then the one-time tunnel change in wyts-platform's `scripts/deployment/cloudflare-tunnel-setup.ts` (wildcard ingress rule **after** the `dokploy.wyzar.io` rules, proxied `*` CNAME, `--dry-run` first), the four checks the plan lists, and the fallback if the wildcard CNAME does not route.
-3. **Step 7, removal from wyts-platform** — only after the deployed app passes the parity check. One commit, `refactor: remove the meteo bench, extracted to vibl/meteo`. Mind the `AGENTS.md` correction above and ask before editing it.
-4. **Close this handoff** and surface the plan's three follow-ups (INFRA-HOME, the template question, endpoint abuse).
+1. **Rotate the tunnel connector token** — the user approved it ("G1") at the end of the 2026-10-29 deploy session, which handed it to the next session; confirm in one line before starting, since it briefly drops the tunnel. Set a new tunnel secret through the Cloudflare API (credentials in wyts-platform's `.env.development.local`, tunnel `80c64158-0b78-4ff6-9867-4eed08e2e98c`), fetch the new token, write it into the cloudflared systemd unit on home-server as root **without printing it**, restart cloudflared, then rerun the host checks through Cloudflare (`networking-ingress.md` gives the `curl --resolve` form).
+2. **Get the user's answers** on the remaining open questions: push events, pushing wyts-platform.
+3. **Fix push auto-deploy** once the cause is known, then confirm with a trivial push to `vibl/meteo`: `deployment.all applicationId=6DxKJnAeV08TefWwctYRH` should show a new deployment whose `description` holds the pushed commit hash. This is part of "done".
+4. **Step 7, removal from wyts-platform** — parity has passed, so it is unblocked. One commit, `refactor: remove the meteo bench, extracted to vibl/meteo`. It touches many files (listed in the plan's step 7), so **list them for the user and ask before editing**, per the global file-safety rule, and ask separately before editing wyts-platform's `AGENTS.md`. Stage by explicit path only.
+5. **Close this handoff** and surface the plan's three follow-ups (INFRA-HOME, the template question, endpoint abuse).
 
 ## Open questions
 
-- **Parity.** Nothing in the checklist has been confirmed by a human. A failure here changes step 6 and 7's timing, not their content.
-- **An orphaned commit on GitHub still carries the deployment detail in the README.** The user asked for the detail to leave the public `README.md` (it lives in `AGENTS.md` now) and for the history to be rewritten, which was done and force-pushed. Every commit reachable from `main` is clean apart from `AGENTS.md`, as intended. But GitHub keeps unreachable commits addressable by SHA until it garbage-collects: `gh api repos/vibl/meteo/commits/36c869c` still resolves. Only GitHub Support running GC, or deleting and recreating the repository, removes it for certain. The user has been told and has not decided. There are no credentials anywhere in the tree or in any history (checked: no `.env`, no key/token/password/bearer matches). Blocks nothing.
-- **Editing wyts-platform's `AGENTS.md`** in step 7 needs the user's explicit OK, per the plan.
+- **Why no push events reach `Dokploy-2026-05-07-vibl`.** Blocks the "a push redeploys it" criterion, and affects the wyts apps too.
+- **Push wyts-platform's two local commits?** Asked, no answer yet. Pushing triggers nothing while push events are broken.
+- **Random-host 502 vs 404.** Cosmetic; ask only if the user cares.
+- **An orphaned commit on GitHub still carries the deployment detail in the old README** (`gh api repos/vibl/meteo/commits/36c869c` resolves until GitHub garbage-collects it). The user has been told and has not decided. No credentials are involved. Blocks nothing.
+- **Editing wyts-platform's `AGENTS.md`** in step 7 needs the user's explicit OK.
 
 ## Read first
 
-- [sessions/2026-10-29_move-to-meteo.md](sessions/2026-10-29_move-to-meteo.md) — the latest session: this handoff and its plan moved from wyts-platform.
+- [sessions/2026-10-29_deploy.md](sessions/2026-10-29_deploy.md) — the latest session: deploy, tunnel, GitHub App investigation.
 - [sessions/2026-10-29_scaffold-and-port.md](sessions/2026-10-29_scaffold-and-port.md) — the session that built the app.
-- The decisions file and the plan, linked above.
-- wyts-platform's [.agents/docs/shadcn-svelte/cli-registry-drift.md](../../../../wyts-platform/.agents/docs/shadcn-svelte/cli-registry-drift.md) — why the UI kit was copied rather than generated.
-- `~/dev/_/meteo/AGENTS.md` and `README.md` — the new app, described from the inside.
+- wyts-platform's `docs/development/deployment/dokploy-platform.md` ("GitHub App") and `networking-ingress.md` ("Public `*.wyzar.io` hosts").
+- The plan's step 7 (ask before reading), and `~/dev/_/meteo/AGENTS.md`.
