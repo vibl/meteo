@@ -10,7 +10,11 @@ A SvelteKit app showing the weather for Nogent-sur-Marne. Read [README.md](READM
 
 ## Origin
 
-The app was extracted from the `meteo` bench of [wyts-platform](../wyts-platform), ported from its commit `b416a2cd`. The extraction decisions are recorded in that repo, under `.specs/prompts/plans/2026-10-26_meteo-bench-extraction-decisions.md`.
+The app was extracted from the `meteo` bench of [wyts-platform](../wyts-platform), ported from its commit `b416a2cd`. The extraction decisions are recorded in [.agents/plans/2026-10-26_meteo-bench-extraction-decisions.md](.agents/plans/2026-10-26_meteo-bench-extraction-decisions.md), next to the plan, both moved here from wyts-platform.
+
+## Handoff
+
+Multi-session work in progress has a handoff in `.agents/handoffs/<name>/`, holding `handoff.md` and its session logs. There is one right now: [meteo-bench-extraction](.agents/handoffs/meteo-bench-extraction/handoff.md), which still has to deploy the app and remove the bench from wyts-platform. A session opening with just "continue" goes there. When a second handoff appears, replace this pointer with a line saying to list `.agents/handoffs/` and pick the matching one.
 
 Meteo's own code (page, grids, cells, columns, types, the Météo-France server module, the activity detector) was copied as is, so it still reads like wyts-platform code: two-space indentation, the same Prettier config. Keep it that way rather than restyling it.
 
