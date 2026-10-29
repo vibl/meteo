@@ -16,6 +16,11 @@ The app was extracted from the `meteo` bench of [wyts-platform](../wyts-platform
 
 Multi-session work in progress has a handoff in `.agents/handoffs/<name>/`, holding `handoff.md` and its session logs. There is one right now: [meteo-bench-extraction](.agents/handoffs/meteo-bench-extraction/handoff.md), which still has to deploy the app and remove the bench from wyts-platform. A session opening with just "continue" goes there. When a second handoff appears, replace this pointer with a line saying to list `.agents/handoffs/` and pick the matching one.
 
+## Plans
+
+- `.agents/plans/` holds plans from before this project used handoffs. Don't add new ones: plan new work in a handoff (`.agents/handoffs/<name>/`).
+- Never read a file there without asking me first and getting an explicit yes, even one this file links to. A handoff is not a plan file.
+
 Meteo's own code (page, grids, cells, columns, types, the Météo-France server module, the activity detector) was copied as is, so it still reads like wyts-platform code: two-space indentation, the same Prettier config. Keep it that way rather than restyling it.
 
 ## The UI kit is not stock
