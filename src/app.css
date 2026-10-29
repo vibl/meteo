@@ -1,1 +1,159 @@
+/* SVAR's icon font: the sortable grid headers render their arrows from it. */
+@import url('https://cdn.svar.dev/fonts/wxi/wx-icons.css');
 @import 'tailwindcss';
+
+/* ========================================
+   PALETTE — the wyts dark theme as fixed tokens
+   Copied from wyts-platform's src/styles/strategies/combination-a.css. The app
+   is dark-only, so there is no light variant and no JS theme system.
+   ======================================== */
+:root {
+  color-scheme: dark;
+
+  /* Background colors */
+  --base-bg-primary: hsl(312.86, 46.67%, 5.88%);
+  --base-bg-card: hsl(309.97, 37.51%, 9.42%);
+  --base-bg-popover: hsl(315.38, 35.34%, 13.33%);
+  --base-bg-muted: hsl(300.52, 33.1%, 11.88%);
+
+  /* Foreground colors */
+  --base-fg-primary: hsl(29.16, 100%, 85.65%);
+  --base-fg-secondary: hsl(20.91, 55.04%, 62.26%);
+  --base-fg-dark: hsl(334.45, 46.66%, 11.82%);
+
+  /* Border colors */
+  --base-border: hsl(334.54, 26.12%, 42.53%);
+
+  /* Accent colors */
+  --base-accent: hsl(19.67, 85.45%, 59.41%);
+  --base-accent-secondary: hsl(28.54, 90.05%, 61.76%);
+  --base-accent-tertiary: hsl(20.3, 73.11%, 52.51%);
+  --base-accent-light: hsl(39.19, 87.96%, 68.96%);
+  --base-highlight: hsl(343.82, 35.3%, 46.96%);
+  --base-destructive: hsl(0.08, 72.12%, 50.49%);
+
+  /* Semantic mappings consumed by the shadcn components */
+  --radius: 0.625rem;
+  --background: var(--base-bg-primary);
+  --foreground: var(--base-fg-primary);
+  --card: var(--base-bg-card);
+  --card-foreground: var(--base-fg-primary);
+  --popover: var(--base-bg-popover);
+  --popover-foreground: var(--base-fg-primary);
+  --primary: var(--base-accent);
+  --primary-foreground: var(--base-fg-dark);
+  --secondary: var(--base-accent-secondary);
+  --secondary-foreground: var(--base-fg-dark);
+  --muted: var(--base-bg-muted);
+  --muted-foreground: var(--base-fg-secondary);
+  --accent: var(--base-accent-secondary);
+  --accent-foreground: var(--base-fg-dark);
+  --destructive: var(--base-destructive);
+  --border: var(--base-border);
+  --input: var(--base-border);
+  --ring: var(--base-accent);
+}
+
+/* ========================================
+   SVAR TOKENS — the --wx-* mapping onto the palette
+   Trimmed from wyts-platform's src/lib/theme/wyts-tokens.css: only what the
+   two grids read. The grid- and table-specific variables live with the
+   DatagridTheme wrapper, in src/lib/components/DatagridTheme.svelte.
+   ======================================== */
+:root {
+  --wx-color-primary: var(--base-accent);
+  --wx-color-primary-hover: oklch(from var(--base-accent) calc(l + 0.03) c h);
+  --wx-color-primary-active: oklch(from var(--base-accent) calc(l - 0.03) c h);
+  --wx-color-primary-light: var(--base-accent-light);
+  --wx-color-primary-selected: color-mix(in srgb, var(--wx-color-primary) 30%, transparent);
+  --wx-color-primary-font: var(--base-fg-dark);
+
+  --wx-color-secondary: var(--base-accent-secondary);
+  --wx-color-danger: var(--base-destructive);
+
+  --wx-color-disabled: var(--base-bg-muted);
+
+  /* Backgrounds */
+  --wx-color-background: var(--base-bg-primary);
+  --wx-color-background-alt: var(--base-bg-card);
+  --wx-color-background-light: var(--base-bg-muted);
+  --wx-color-surface: var(--base-bg-card);
+  --wx-color-surface-alt: var(--base-bg-popover);
+  --wx-background: var(--wx-color-surface);
+
+  /* Text */
+  --wx-color-font: var(--base-fg-primary);
+  --wx-color-font-secondary: var(--base-fg-secondary);
+  --wx-color-font-alt: var(--wx-color-font-secondary);
+  --wx-color-font-disabled: color-mix(
+    in srgb,
+    var(--wx-color-font) 45%,
+    var(--wx-color-font-secondary) 55%
+  );
+
+  /* Borders */
+  --wx-color-border: var(--base-border);
+  --wx-color-border-light: color-mix(in oklch, var(--base-border) 70%, transparent);
+  --wx-border: 1px solid var(--wx-color-border);
+
+  /* Typography */
+  --wx-font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --wx-font-size: 14px;
+  --wx-font-size-sm: 12px;
+  --wx-font-size-md: 14px;
+  --wx-font-size-lg: 16px;
+  --wx-font-weight: 400;
+  --wx-font-weight-md: 600;
+  --wx-font-weight-lg: 700;
+  --wx-line-height: 20px;
+  --wx-line-height-sm: 16px;
+  --wx-line-height-md: 24px;
+
+  /* Spacing, radius */
+  --wx-spacing-xs: 4px;
+  --wx-spacing-sm: 8px;
+  --wx-spacing-md: 16px;
+  --wx-padding: 8px;
+  --wx-border-radius: 6px;
+  --wx-border-radius-sm: 4px;
+  --wx-border-radius-lg: 8px;
+
+  /* Icons */
+  --wx-icon-size: var(--wx-line-height);
+  --wx-icon-color: var(--wx-color-font-secondary);
+  --wx-icon-border-radius: 2px;
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
