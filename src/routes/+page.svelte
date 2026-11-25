@@ -19,7 +19,7 @@
   import { getGlobalActivityDetector } from '$lib/activity';
 
   const BIRDS_ALERT_KEY = 'meteo:birds-alert-enabled';
-  const BIRDS_ALERT_POLL_MS = 10 * 60 * 1000;
+  const BIRDS_ALERT_POLL_MS = 5 * 60 * 1000;
 
   let forecastRows = $state<ForecastRow[]>([]);
   let rainRows = $state<RainRow[]>([]);
@@ -218,7 +218,7 @@
     return unsubscribe;
   });
 
-  // While the birds-on-rain-stop alert is enabled, poll every 10 minutes so
+  // While the birds-on-rain-stop alert is enabled, poll every 5 minutes so
   // the rain → no-rain transition is detected even when the tab is idle.
   $effect(() => {
     if (!birdsAlertEnabled) return;
