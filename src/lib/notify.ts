@@ -35,10 +35,15 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
 export async function notifyRainStopped(): Promise<void> {
   if (!notificationsSupported() || Notification.permission !== 'granted') return;
 
-  const options: NotificationOptions = {
+  // PNG, not the SVG: Android does not reliably render SVG notification icons.
+  // `renotify` makes a second rain stop alert again even if the first
+  // notification is still in the tray (same tag would otherwise replace it
+  // silently). It is missing from TypeScript's DOM lib, hence the widened type.
+  const options: NotificationOptions & { renotify?: boolean } = {
     body: BODY,
-    icon: '/icon.svg',
-    tag: 'rain-stopped'
+    icon: '/icon-192.png',
+    tag: 'rain-stopped',
+    renotify: true
   };
 
   const registration = await navigator.serviceWorker?.getRegistration();
